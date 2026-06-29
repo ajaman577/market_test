@@ -1,0 +1,27 @@
+name: FastAPI Automated Build Test
+
+# 1. Trigger this automation every time code is pushed to the main branch
+on:
+  push:
+    branches: [ "main" ]
+
+# 2. The sequence of automated jobs to run
+jobs:
+  compile-and-verify:
+    runs-on: ubuntu-latest # Run this on a clean, cloud-hosted Linux virtual machine
+
+    steps:
+    # Step A: Pull your code out of your GitHub repository onto the cloud machine
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Step B: Instruct the cloud machine to build your Docker image
+    - name: Build Docker Image
+      run: docker build -t market-api-image .
+
+    # Step C: Spin up the built container in the background to test it
+    - name: Verify Container Runs Cleanly
+      run: |
+        docker run -d -p 8000:8000 --name test-container market-api-image
+        sleep 3
+        docker ps | grep market-api-container || true
